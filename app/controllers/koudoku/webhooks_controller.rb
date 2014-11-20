@@ -40,6 +40,12 @@ module Koudoku
 
         subscription = ::Subscription.find_by_stripe_id(stripe_id)
         subscription.card_updated
+      elsif data_json['type'] == "customer.subscription.updated"
+
+        stripe_id = data_json['data']['object']['customer']
+
+
+        subscription.subscription_updated(data_json)
       end
       
       render nothing: true

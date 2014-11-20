@@ -261,4 +261,6 @@ module Koudoku::Subscription
   def customer_card_updated
   end
 
+  def subscription_updated_by_stripe(data)
+  end
 end
