@@ -96,7 +96,9 @@ module Koudoku::Subscription
 
             # store the customer id.
             self.stripe_id = customer.id
-            self.last_four = customer.cards.retrieve(customer.default_card).last4
+
+
+            self.last_four = customer.cards.retrieve(customer.default_card).last4 if customer.default_card
 
             finalize_new_subscription!
             finalize_upgrade!
@@ -251,6 +253,12 @@ module Koudoku::Subscription
   end
 
   def charge_disputed
+  end
+
+  def deleted_by_stripe
+  end
+
+  def customer_card_updated
   end
 
 end

@@ -28,7 +28,18 @@ module Koudoku
     
         subscription = ::Subscription.find_by_stripe_id(stripe_id)
         subscription.charge_disputed
-      
+      elsif data_json['type'] == "customer.subscription.deleted"
+
+        stripe_id = data_json['data']['object']['customer']
+
+        subscription = ::Subscription.find_by_stripe_id(stripe_id)
+        subscription.deleted_by_stripe
+      elsif data_json['type'] == "customer.card.updated"
+
+        stripe_id = data_json['data']['object']['customer']
+
+        subscription = ::Subscription.find_by_stripe_id(stripe_id)
+        subscription.card_updated
       end
       
       render nothing: true
