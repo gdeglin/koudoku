@@ -25,7 +25,8 @@ module Koudoku::Subscription
           customer = Stripe::Customer.retrieve(self.stripe_id)
           customer.description = subscription_owner_description if subscription_owner_description
           customer.email = subscription_owner_email if subscription_owner_email
-          customer.credit_card_token = credit_card_token if credit_card_token
+          customer.card = credit_card_token if credit_card_token && credit_card_token.match(/tok/)
+          customer = customer.save
 
           # if a new plan has been selected
           if self.plan.present?
@@ -35,6 +36,7 @@ module Koudoku::Subscription
 
             prepare_for_downgrade if downgrading?
             prepare_for_upgrade if upgrading?
+
 
             # update the package level with stripe.
             customer.update_subscription(:plan => self.plan.stripe_id)
