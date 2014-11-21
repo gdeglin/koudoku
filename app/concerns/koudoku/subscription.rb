@@ -23,6 +23,9 @@ module Koudoku::Subscription
 
           # fetch the customer.
           customer = Stripe::Customer.retrieve(self.stripe_id)
+          customer.description = subscription_owner_description if subscription_owner_description
+          customer.email = subscription_owner_email if subscription_owner_email
+          customer.credit_card_token = credit_card_token if credit_card_token
 
           # if a new plan has been selected
           if self.plan.present?
@@ -38,7 +41,7 @@ module Koudoku::Subscription
 
             finalize_downgrade! if downgrading?
             finalize_upgrade! if upgrading?
-
+            self.current_period_start = customer.subscriptions.first.current_period_start
           # if no plan has been selected.
           else
 
@@ -87,6 +90,7 @@ module Koudoku::Subscription
 
               finalize_new_customer!(customer.id, plan.price)
               customer.update_subscription(:plan => plan.stripe_id)
+              self.current_period_start = customer.subscriptions.first.current_period_start
 
             rescue Stripe::CardError => card_error
               errors[:base] << card_error.message
@@ -99,6 +103,7 @@ module Koudoku::Subscription
 
 
             self.last_four = customer.cards.retrieve(customer.default_card).last4 if customer.default_card
+            self.current_period_start = customer.subscriptions.first.current_period_start
 
             finalize_new_subscription!
             finalize_upgrade!
@@ -130,6 +135,8 @@ module Koudoku::Subscription
 
         # update the last four based on this new card.
         self.last_four = customer.cards.retrieve(customer.default_card).last4
+
+        self.current_period_start = customer.subscriptions.first.current_period_start
         finalize_card_update!
 
       end
